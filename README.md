@@ -1,7 +1,7 @@
 # Build drogon on windows without conan
 
-drogon: <https://github.com/drogonframework/drogon>
-onenssl: <https://kb.firedaemon.com/support/solutions/articles/4000121705#Download-OpenSSL>
+- drogon: <https://github.com/drogonframework/drogon>
+- openssl: <https://kb.firedaemon.com/support/solutions/articles/4000121705#Download-OpenSSL>
 
 ```pwsh
 mkdir vendor
