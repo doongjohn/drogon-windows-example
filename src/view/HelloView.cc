@@ -21,8 +21,7 @@ std::string HelloView::genText(const DrTemplateData& HelloView_view_data)
 	HelloView_tmp_stream << "<html>\n";
   auto name = HelloView_view_data.get<std::string>("name");
 	bool nameIsEmpty = name == "";
-	if (nameIsEmpty)
-		name = "anonymous";
+	if (nameIsEmpty) name = "anonymous";
 	auto message = "Hello, " + name + " from a CSP template";
 	HelloView_tmp_stream << "<head>\n";
 	HelloView_tmp_stream << "  <meta charset=\"UTF-8\">\n";
@@ -39,13 +38,11 @@ std::string HelloView::genText(const DrTemplateData& HelloView_view_data)
 	HelloView_tmp_stream << "</head>\n";
 	HelloView_tmp_stream << "<body>\n";
 	HelloView_tmp_stream << "  ";
- HelloView_tmp_stream << message; 
+HelloView_tmp_stream<<message;
 	HelloView_tmp_stream << "	";
     if (nameIsEmpty)
-    {
       HelloView_tmp_stream << "<br>"
          << "You can revisit the same page and append ?name=<i>your_name</i> to change the name";
-    }
 	
 	HelloView_tmp_stream << "</body>\n";
 	HelloView_tmp_stream << "</html>\n";
