@@ -3,7 +3,7 @@
 - drogon: <https://github.com/drogonframework/drogon>
 - openssl: <https://kb.firedaemon.com/support/solutions/articles/4000121705#Download-OpenSSL>
 
-```pwsh
+```sh
 mkdir vendor
 cd vendor
 git clone --depth=1 --recurse-submodules https://github.com/drogonframework/drogon.git
