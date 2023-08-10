@@ -12,15 +12,15 @@ project(
   LANGUAGES CXX
 )
 
-# OpenSSL: https://kb.firedaemon.com/support/solutions/articles/4000121705#Download-OpenSSL
-set(OPENSSL_ROOT_DIR "${PROJECT_SOURCE_DIR}/vendor/openssl/")
+# OpenSSL: https://kb.firedaemon.com/support/solutions/articles/4000121705-openssl-3-1-3-0-and-1-1-1-binary-distributions-for-microsoft-windows
+set(OPENSSL_ROOT_DIR "${PROJECT_SOURCE_DIR}/vendor/openssl/x64")
 
 # library paths for the `find_package()`
 list(APPEND CMAKE_PREFIX_PATH
-  "${PROJECT_SOURCE_DIR}/vendor/jsoncpp/"
-  "${PROJECT_SOURCE_DIR}/vendor/jsoncpp/build/lib/Debug/"
-  "${PROJECT_SOURCE_DIR}/vendor/zlib/"
-  "${PROJECT_SOURCE_DIR}/vendor/zlib/build/Debug/")
+  "${PROJECT_SOURCE_DIR}/vendor/jsoncpp"
+  "${PROJECT_SOURCE_DIR}/vendor/jsoncpp/build/lib/Debug"
+  "${PROJECT_SOURCE_DIR}/vendor/zlib"
+  "${PROJECT_SOURCE_DIR}/vendor/zlib/build/Debug")
 
 set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE) # don't build examples
 add_subdirectory(vendor/drogon)
@@ -34,15 +34,26 @@ set_target_properties(webserver
 target_compile_features(webserver
   PRIVATE cxx_std_20)
 
+file(GLOB CSP_FILES src/views/*.csp)
+foreach(csp ${CSP_FILES})
+  get_filename_component(classname ${csp} NAME_WE)
+  message(STATUS "[drogon_ctl] csp file:" ${csp})
+  message(STATUS "[drogon_ctl] view classname: " ${classname})
+  add_custom_command(
+    OUTPUT ${classname}.h ${classname}.cc
+    COMMAND $<TARGET_FILE:_drogon_ctl> ARGS create view ${csp}
+    DEPENDS ${csp}
+    VERBATIM)
+  set(VIEWSRC ${VIEWSRC} ${classname}.cc)
+endforeach()
+
 file(GLOB SRC_FILES
   src/*.cpp
   src/*.hpp
   src/controller/*.cpp
-  src/controller/*.hpp
-  src/view/*.cc
-  src/view/*.h)
+  src/controller/*.hpp)
 target_sources(webserver
-  PRIVATE ${SRC_FILES})
+  PRIVATE ${SRC_FILES} ${VIEWSRC})
 
 target_link_libraries(webserver
   drogon)
@@ -79,3 +90,21 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
   #   PRIVATE
   #     /VERBOSE)
 endif()
+
+add_custom_command(TARGET webserver POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    "${PROJECT_SOURCE_DIR}/vendor/jsoncpp/build/bin/$<CONFIGURATION>/jsoncpp.dll"
+    "${PROJECT_SOURCE_DIR}/vendor/zlib/build/$<CONFIGURATION>/zlibd.dll"
+    "${PROJECT_SOURCE_DIR}/vendor/openssl/x64/bin/libcrypto-1_1-x64.dll"
+    "${PROJECT_SOURCE_DIR}/vendor/openssl/x64/bin/libssl-1_1-x64.dll"
+    $<TARGET_FILE_DIR:webserver>)
+
+add_custom_target(vendor_drogon_ctl)
+add_dependencies(vendor_drogon_ctl drogon_ctl)
+add_custom_command(TARGET vendor_drogon_ctl POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    "${PROJECT_SOURCE_DIR}/vendor/jsoncpp/build/bin/$<CONFIGURATION>/jsoncpp.dll"
+    "${PROJECT_SOURCE_DIR}/vendor/zlib/build/$<CONFIGURATION>/zlibd.dll"
+    "${PROJECT_SOURCE_DIR}/vendor/openssl/x64/bin/libcrypto-1_1-x64.dll"
+    "${PROJECT_SOURCE_DIR}/vendor/openssl/x64/bin/libssl-1_1-x64.dll"
+    $<TARGET_FILE_DIR:drogon_ctl>)
