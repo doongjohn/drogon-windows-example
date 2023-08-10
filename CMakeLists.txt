@@ -15,6 +15,7 @@ project(
 # OpenSSL: https://kb.firedaemon.com/support/solutions/articles/4000121705-openssl-3-1-3-0-and-1-1-1-binary-distributions-for-microsoft-windows
 set(OPENSSL_ROOT_DIR "${PROJECT_SOURCE_DIR}/vendor/openssl/x64")
 
+# TODO: learn about ExternalProject_Add
 # library paths for the `find_package()`
 list(APPEND CMAKE_PREFIX_PATH
   "${PROJECT_SOURCE_DIR}/vendor/jsoncpp"
@@ -41,7 +42,7 @@ foreach(csp ${CSP_FILES})
   message(STATUS "[drogon_ctl] view classname: " ${classname})
   add_custom_command(
     OUTPUT ${classname}.h ${classname}.cc
-    COMMAND $<TARGET_FILE:_drogon_ctl> ARGS create view ${csp}
+    COMMAND $<TARGET_FILE:_drogon_ctl> ARGS create view ${csp} # TODO: set output dir
     DEPENDS ${csp}
     VERBATIM)
   set(VIEWSRC ${VIEWSRC} ${classname}.cc)
