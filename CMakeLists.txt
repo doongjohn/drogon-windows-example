@@ -36,18 +36,20 @@ set_target_properties(webserver
 target_compile_features(webserver
   PRIVATE cxx_std_20)
 
-# generate c++ file from src/views/*.csp files
+# generate c++ files from src/views/*.csp files
 file(GLOB CSP_FILES src/views/*.csp)
 foreach(csp ${CSP_FILES})
   get_filename_component(classname ${csp} NAME_WE)
   message(STATUS "[drogon_ctl] csp file:" ${csp})
   message(STATUS "[drogon_ctl] view classname: " views/${classname})
   add_custom_command(
-    OUTPUT views/${classname}.h views/${classname}.cc
+    OUTPUT
+      views/${classname}.h
+      views/${classname}.cc
     COMMAND $<TARGET_FILE:_drogon_ctl> ARGS create view ${csp} -o ./views
     DEPENDS ${csp}
     VERBATIM)
-  set(VIEWSRC ${VIEWSRC} views/${classname}.cc)
+  set(VIEWSRC_FILES ${VIEWSRC_FILES} views/${classname}.cc)
 endforeach()
 
 file(GLOB SRC_FILES
@@ -56,7 +58,7 @@ file(GLOB SRC_FILES
   src/controller/*.cpp
   src/controller/*.hpp)
 target_sources(webserver
-  PRIVATE ${SRC_FILES} ${VIEWSRC})
+  PRIVATE ${SRC_FILES} ${VIEWSRC_FILES})
 
 target_link_libraries(webserver
   drogon)
