@@ -13,13 +13,15 @@ project(
 
 set(OPENSSL_ROOT_DIR "${PROJECT_SOURCE_DIR}/vendor/openssl-1.1/x64")
 
-# TODO: learn about ExternalProject_Add
 # library paths for the `find_package()`
 list(APPEND CMAKE_PREFIX_PATH
   "${PROJECT_SOURCE_DIR}/vendor/jsoncpp"
   "${PROJECT_SOURCE_DIR}/vendor/jsoncpp/build/lib/Debug"
+  "${PROJECT_SOURCE_DIR}/vendor/jsoncpp/build/lib/Release")
+list(APPEND CMAKE_PREFIX_PATH
   "${PROJECT_SOURCE_DIR}/vendor/zlib"
-  "${PROJECT_SOURCE_DIR}/vendor/zlib/build/Debug")
+  "${PROJECT_SOURCE_DIR}/vendor/zlib/build/Debug"
+  "${PROJECT_SOURCE_DIR}/vendor/zlib/build/Release")
 
 set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE) # don't build examples
 include_directories("${PROJECT_SOURCE_DIR}/vendor/zlib/build") # this is for zconf.h
