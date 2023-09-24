@@ -36,18 +36,18 @@ set_target_properties(webserver
 target_compile_features(webserver
   PRIVATE cxx_std_20)
 
-# generate cpp from src/views/*.csp files
+# generate c++ file from src/views/*.csp files
 file(GLOB CSP_FILES src/views/*.csp)
 foreach(csp ${CSP_FILES})
   get_filename_component(classname ${csp} NAME_WE)
   message(STATUS "[drogon_ctl] csp file:" ${csp})
-  message(STATUS "[drogon_ctl] view classname: " ${classname})
+  message(STATUS "[drogon_ctl] view classname: " views/${classname})
   add_custom_command(
-    OUTPUT ${classname}.h ${classname}.cc
-    COMMAND $<TARGET_FILE:_drogon_ctl> ARGS create view ${csp} # TODO: set output dir
+    OUTPUT views/${classname}.h views/${classname}.cc
+    COMMAND $<TARGET_FILE:_drogon_ctl> ARGS create view ${csp} -o ./views
     DEPENDS ${csp}
     VERBATIM)
-  set(VIEWSRC ${VIEWSRC} ${classname}.cc)
+  set(VIEWSRC ${VIEWSRC} views/${classname}.cc)
 endforeach()
 
 file(GLOB SRC_FILES
