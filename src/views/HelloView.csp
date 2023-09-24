@@ -3,7 +3,7 @@
 <%c++
   auto name = @@.get<std::string>("name");
   bool nameIsEmpty = name == "";
-  if (nameIsEmpty) name = "anonymous";
+  if (nameIsEmpty) name = "\"\"";
   auto message = "Hello, " + name + " from a CSP template";
 %>
 <head>

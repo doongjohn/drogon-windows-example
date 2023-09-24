@@ -34,15 +34,7 @@ set_target_properties(webserver
 target_compile_features(webserver
   PRIVATE cxx_std_20)
 
-file(GLOB SRC_FILES
-  src/*.cpp
-  src/*.hpp
-  src/controller/*.cpp
-  src/controller/*.hpp)
-target_sources(webserver
-  PRIVATE ${SRC_FILES} ${VIEWSRC})
-
-# build src/views/*.csp files
+# generate cpp from src/views/*.csp files
 file(GLOB CSP_FILES src/views/*.csp)
 foreach(csp ${CSP_FILES})
   get_filename_component(classname ${csp} NAME_WE)
@@ -55,6 +47,14 @@ foreach(csp ${CSP_FILES})
     VERBATIM)
   set(VIEWSRC ${VIEWSRC} ${classname}.cc)
 endforeach()
+
+file(GLOB SRC_FILES
+  src/*.cpp
+  src/*.hpp
+  src/controller/*.cpp
+  src/controller/*.hpp)
+target_sources(webserver
+  PRIVATE ${SRC_FILES} ${VIEWSRC})
 
 target_link_libraries(webserver
   drogon)
