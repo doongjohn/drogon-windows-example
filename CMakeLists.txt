@@ -1,7 +1,12 @@
 cmake_minimum_required(VERSION 3.27)
 
+if (NOT WIN32)
+  message(FATAL_ERROR "This project only works on windows!")
+endif()
+
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_COLOR_DIAGNOSTICS ON)
+set(CMAKE_GNUtoMS ON) # this is for mingw
 
 project(
   webserver
@@ -69,22 +74,12 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
       # more warnings
       -Wall -Wextra)
 
-  if (NOT WIN32)
-    # use sanitizers
-    set(SANITIZER_OPTIONS
-      $<$<CONFIG:Debug>:-fno-omit-frame-pointer>
-      $<$<CONFIG:Debug>:-fno-sanitize-recover=all>
-      $<$<CONFIG:Debug>:-fsanitize=address,undefined>)
-    target_compile_options(webserver
-      PRIVATE ${SANITIZER_OPTIONS})
-    target_link_options(webserver
-      PRIVATE ${SANITIZER_OPTIONS})
-  endif()
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+  # for parallel build: https://stackoverflow.com/a/70102570
   target_compile_options(webserver
     PRIVATE
       # more warnings
-      /W4 /sdl)
+      /Wall /sdl)
 
   # target_link_options(webserver
   #   PRIVATE
@@ -95,18 +90,37 @@ add_custom_target(vendor_drogon_ctl)
 add_dependencies(vendor_drogon_ctl drogon_ctl)
 add_dependencies(webserver vendor_drogon_ctl)
 
-add_custom_command(TARGET webserver POST_BUILD
-  COMMAND ${CMAKE_COMMAND} -E copy_if_different
+if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+  add_custom_command(TARGET webserver POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    "${PROJECT_SOURCE_DIR}/vendor/jsoncpp/build/bin/$<CONFIGURATION>/libjsoncpp.dll"
+    "${PROJECT_SOURCE_DIR}/vendor/zlib/build/$<CONFIGURATION>/libzlib.dll"
+    "${PROJECT_SOURCE_DIR}/vendor/openssl-1.1/x64/bin/libcrypto-1_1-x64.dll"
+    "${PROJECT_SOURCE_DIR}/vendor/openssl-1.1/x64/bin/libssl-1_1-x64.dll"
+    $<TARGET_FILE_DIR:webserver>)
+
+  add_custom_command(TARGET vendor_drogon_ctl POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    "${PROJECT_SOURCE_DIR}/vendor/jsoncpp/build/bin/$<CONFIGURATION>/libjsoncpp.dll"
+    "${PROJECT_SOURCE_DIR}/vendor/zlib/build/$<CONFIGURATION>/libzlib.dll"
+    "${PROJECT_SOURCE_DIR}/vendor/openssl-1.1/x64/bin/libcrypto-1_1-x64.dll"
+    "${PROJECT_SOURCE_DIR}/vendor/openssl-1.1/x64/bin/libssl-1_1-x64.dll"
+    $<TARGET_FILE_DIR:drogon_ctl>)
+
+elseif (CMAKE_CXX_COMPILER_ID MATCHES "MSVC|Clang")
+  add_custom_command(TARGET webserver POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
     "${PROJECT_SOURCE_DIR}/vendor/jsoncpp/build/bin/$<CONFIGURATION>/jsoncpp.dll"
     "${PROJECT_SOURCE_DIR}/vendor/zlib/build/$<CONFIGURATION>/zlibd.dll"
     "${PROJECT_SOURCE_DIR}/vendor/openssl-1.1/x64/bin/libcrypto-1_1-x64.dll"
     "${PROJECT_SOURCE_DIR}/vendor/openssl-1.1/x64/bin/libssl-1_1-x64.dll"
     $<TARGET_FILE_DIR:webserver>)
 
-add_custom_command(TARGET vendor_drogon_ctl POST_BUILD
-  COMMAND ${CMAKE_COMMAND} -E copy_if_different
+  add_custom_command(TARGET vendor_drogon_ctl POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
     "${PROJECT_SOURCE_DIR}/vendor/jsoncpp/build/bin/$<CONFIGURATION>/jsoncpp.dll"
     "${PROJECT_SOURCE_DIR}/vendor/zlib/build/$<CONFIGURATION>/zlibd.dll"
     "${PROJECT_SOURCE_DIR}/vendor/openssl-1.1/x64/bin/libcrypto-1_1-x64.dll"
     "${PROJECT_SOURCE_DIR}/vendor/openssl-1.1/x64/bin/libssl-1_1-x64.dll"
     $<TARGET_FILE_DIR:drogon_ctl>)
+endif()
