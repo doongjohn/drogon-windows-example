@@ -33,8 +33,9 @@ list(APPEND CMAKE_PREFIX_PATH
   "${PROJECT_SOURCE_DIR}/vendor/zlib/build/RelWithDebInfo"
   "${PROJECT_SOURCE_DIR}/vendor/zlib/build/MinSizeRel")
 
-set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE) # don't build examples
 include_directories("${PROJECT_SOURCE_DIR}/vendor/zlib/build") # this is for zconf.h
+
+set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE) # don't build examples
 add_subdirectory(vendor/drogon)
 
 add_executable(webserver "")
