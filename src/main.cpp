@@ -22,7 +22,7 @@ auto main() -> int {
     "/user/{user-name}",
     [](const HttpRequestPtr &, std::function<void(const HttpResponsePtr &)> &&callback, const std::string &name) {
       auto resp = HttpResponse::newHttpResponse();
-      resp->setBody("Hello, " + name + "!");
+      resp->setBody("<pre>/user/{user-name}</pre>Hello, " + name + "!");
       callback(resp);
     },
     {Get});
@@ -33,7 +33,7 @@ auto main() -> int {
     "/hello?user={user-name}",
     [](const HttpRequestPtr &, std::function<void(const HttpResponsePtr &)> &&callback, const std::string &name) {
       auto resp = HttpResponse::newHttpResponse();
-      resp->setBody("Hello, " + name + "!");
+      resp->setBody("<pre>/hello?user={user-name}</pre>Hello, " + name + "!");
       callback(resp);
     },
     {Get});

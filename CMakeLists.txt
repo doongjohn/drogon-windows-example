@@ -9,24 +9,29 @@ set(CMAKE_COLOR_DIAGNOSTICS ON)
 set(CMAKE_GNUtoMS ON) # this is for mingw
 
 project(
-  webserver
+  WindowsDrogonWebServer
   VERSION 0.1.0
   DESCRIPTION ""
   HOMEPAGE_URL ""
   LANGUAGES CXX
 )
 
+# set openssl path
 set(OPENSSL_ROOT_DIR "${PROJECT_SOURCE_DIR}/vendor/openssl-1.1/x64")
 
 # library paths for the `find_package()`
 list(APPEND CMAKE_PREFIX_PATH
   "${PROJECT_SOURCE_DIR}/vendor/jsoncpp"
   "${PROJECT_SOURCE_DIR}/vendor/jsoncpp/build/lib/Debug"
-  "${PROJECT_SOURCE_DIR}/vendor/jsoncpp/build/lib/Release")
+  "${PROJECT_SOURCE_DIR}/vendor/jsoncpp/build/lib/Release"
+  "${PROJECT_SOURCE_DIR}/vendor/jsoncpp/build/lib/RelWithDebInfo"
+  "${PROJECT_SOURCE_DIR}/vendor/jsoncpp/build/lib/MinSizeRel")
 list(APPEND CMAKE_PREFIX_PATH
   "${PROJECT_SOURCE_DIR}/vendor/zlib"
   "${PROJECT_SOURCE_DIR}/vendor/zlib/build/Debug"
-  "${PROJECT_SOURCE_DIR}/vendor/zlib/build/Release")
+  "${PROJECT_SOURCE_DIR}/vendor/zlib/build/Release"
+  "${PROJECT_SOURCE_DIR}/vendor/zlib/build/RelWithDebInfo"
+  "${PROJECT_SOURCE_DIR}/vendor/zlib/build/MinSizeRel")
 
 set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE) # don't build examples
 include_directories("${PROJECT_SOURCE_DIR}/vendor/zlib/build") # this is for zconf.h
@@ -41,29 +46,30 @@ set_target_properties(webserver
 target_compile_features(webserver
   PRIVATE cxx_std_20)
 
-# generate c++ files from src/views/*.csp files
-file(GLOB CSP_FILES src/views/*.csp)
-foreach(csp ${CSP_FILES})
-  get_filename_component(classname ${csp} NAME_WE)
-  message(STATUS "[drogon_ctl] csp file:" ${csp})
-  message(STATUS "[drogon_ctl] view classname: " views/${classname})
-  add_custom_command(
-    OUTPUT
-      views/${classname}.h
-      views/${classname}.cc
-    COMMAND $<TARGET_FILE:_drogon_ctl> ARGS create view ${csp} -o ./views
-    DEPENDS ${csp}
-    VERBATIM)
-  set(VIEWSRC_FILES ${VIEWSRC_FILES} views/${classname}.cc)
-endforeach()
-
-file(GLOB SRC_FILES
+file(GLOB SOURCES
   src/*.cpp
   src/*.hpp
   src/controller/*.cpp
   src/controller/*.hpp)
+
+# generate c++ files from src/views/*.csp files
+file(GLOB CSP_FILES src/views/*.csp)
+foreach(csp_file ${CSP_FILES})
+  get_filename_component(classname ${csp_file} NAME_WE)
+  message(STATUS "[drogon_ctl] processing csp file: ${csp_file}")
+  add_custom_command(
+    OUTPUT
+      views/${classname}.h
+      views/${classname}.cc
+    COMMAND $<TARGET_FILE:_drogon_ctl> ARGS create view ${csp_file} -o ./views
+    DEPENDS ${csp_file}
+    VERBATIM)
+  message(STATUS "[drogon_ctl] generated: ${CMAKE_BINARY_DIR}/views/${classname}.cc ${CMAKE_BINARY_DIR}/views/${classname}.h")
+  list(APPEND CSP_GEN_SOURCES views/${classname}.cc)
+endforeach()
+
 target_sources(webserver
-  PRIVATE ${SRC_FILES} ${VIEWSRC_FILES})
+  PRIVATE ${SOURCES} ${CSP_GEN_SOURCES})
 
 target_link_libraries(webserver
   drogon)
