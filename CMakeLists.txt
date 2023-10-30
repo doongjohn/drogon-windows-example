@@ -52,7 +52,7 @@ file(GLOB SOURCES
   src/controller/*.cpp
   src/controller/*.hpp)
 
-# generate c++ files from src/views/*.csp files
+# generate c++ files from csp files
 file(GLOB CSP_FILES src/views/*.csp)
 foreach(csp_file ${CSP_FILES})
   get_filename_component(classname ${csp_file} NAME_WE)
@@ -64,7 +64,8 @@ foreach(csp_file ${CSP_FILES})
     COMMAND $<TARGET_FILE:_drogon_ctl> ARGS create view ${csp_file} -o ./views
     DEPENDS ${csp_file}
     VERBATIM)
-  message(STATUS "[drogon_ctl] generated: ${CMAKE_BINARY_DIR}/views/${classname}.cc ${CMAKE_BINARY_DIR}/views/${classname}.h")
+  message(STATUS "[drogon_ctl] generated: ${CMAKE_BINARY_DIR}/views/${classname}.cc")
+  message(STATUS "[drogon_ctl] generated: ${CMAKE_BINARY_DIR}/views/${classname}.h")
   list(APPEND CSP_GEN_SOURCES views/${classname}.cc)
 endforeach()
 
@@ -81,7 +82,6 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
       -Wall -Wextra)
 
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-  # for parallel build: https://stackoverflow.com/a/70102570
   target_compile_options(webserver
     PRIVATE
       # more warnings
