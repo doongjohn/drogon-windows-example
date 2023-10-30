@@ -62,7 +62,7 @@ foreach(csp_file ${CSP_FILES})
     OUTPUT
       views/${classname}.h
       views/${classname}.cc
-    COMMAND $<TARGET_FILE:_drogon_ctl> ARGS create view ${csp_file} -o ./views
+    COMMAND $<TARGET_FILE:drogon_ctl> ARGS create view ${csp_file} -o ./views
     DEPENDS ${csp_file}
     VERBATIM)
   message(STATUS "[drogon_ctl] generated: ${CMAKE_BINARY_DIR}/views/${classname}.cc")
