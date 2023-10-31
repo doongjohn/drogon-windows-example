@@ -35,7 +35,7 @@ list(APPEND CMAKE_PREFIX_PATH
 
 include_directories("${PROJECT_SOURCE_DIR}/vendor/zlib/build") # this is for zconf.h
 
-set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE) # don't build examples
+option(BUILD_EXAMPLES "" OFF)
 add_subdirectory(vendor/drogon)
 
 add_executable(webserver "")
